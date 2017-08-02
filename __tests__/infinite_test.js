@@ -796,6 +796,65 @@ describe('React Infinite when the window is used as the Container', function() {
       }
     });
   });
+
+  it('reacts to window scroll events when useWindowAsScrollContainer is enabled after the initial render', function() {
+    const InfiniteTestWrapper = createReactClass({
+      getInitialState() {
+        return this.props;
+      },
+
+      setProps(props) {
+        this.setState(props);
+      },
+
+      render() {
+        return (
+          <Infinite {...this.state}>
+            {this.props.children}
+          </Infinite>
+        );
+      }
+    });
+
+    var infiniteSpy = jasmine.createSpy('infiniteSpy');
+    var elementHeight = 200;
+
+    var scrollListener;
+
+    window.addEventListener = function(event, f) {
+      if (event === 'scroll') {
+        scrollListener = f;
+      }
+    };
+
+    var rootNode;
+    runs(function() {
+      rootNode = TestUtils.renderIntoDocument(
+        <InfiniteTestWrapper elementHeight={elementHeight}
+                  handleScroll={infiniteSpy}
+                  timeScrollStateLastsForAfterUserScrolls={10000}
+                  className={"correct-class-name"}>
+          {renderHelpers.divGenerator(20, elementHeight)}
+        </InfiniteTestWrapper>
+      );
+    });
+
+    runs(function() {
+      rootNode.setProps({
+        useWindowAsScrollContainer: true
+      });
+    });
+
+    waitsFor(function() {
+      return !!scrollListener;
+    });
+
+    runs(function() {
+      window.pageYOffset = 200;
+      scrollListener();
+      expect(infiniteSpy).toHaveBeenCalled();
+    });
+  });
 });
 
 describe("Specifying React Infinite's preload amounts", function() {

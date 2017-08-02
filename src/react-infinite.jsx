@@ -283,6 +283,10 @@ var Infinite = createReactClass({
   componentDidUpdate(prevProps: ReactInfiniteProps, prevState: ReactInfiniteState) {
     this.loadingSpinnerHeight = this.utils.getLoadingSpinnerHeight();
 
+    if (!prevProps.useWindowAsScrollContainer && this.props.useWindowAsScrollContainer) {
+      this.utils.subscribeToScrollListener();
+    }
+
     if (this.props.displayBottomUpwards) {
       var lowestScrollTop = this.getLowestPossibleScrollTop();
       if (this.shouldAttachToBottom && this.utils.getScrollTop() < lowestScrollTop) {
